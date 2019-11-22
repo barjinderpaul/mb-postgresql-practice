@@ -1,0 +1,47 @@
+show data_directory ;
+
+create table sample_table (
+    id int not null primary key ,
+    username varchar(15) not null,
+    password varchar(20) not null
+);
+
+select * from sample_table;
+
+insert into sample_table (id, username, password) values (1,'first_user','1234');
+
+-- creating schemas ; A logical structure view of the database; can contain views etc.
+-- database ; entire collection of interrelated data containing schemas, data records etc;
+
+create SCHEMA movies_schema;
+create TABLE movies_schema.movies (
+    id int not null primary key ,
+    name varchar(50) not null,
+    director varchar(50) not null,
+    year int not null check ( year between 2000 and 2019)
+);
+
+create TABLE movies_schema.boxoffice (
+    movie_id int not null primary key ,
+    domestic_sales bigint not null ,
+    internation_sales bigint not null
+);
+
+insert into movies_schema.movies values (1,'Jumanji','Any director',2007);
+insert into movies_schema.movies values (2,'Toy Story 2','Any other director',2015);
+insert into movies_schema.movies values (3,'The dark knight','Mark Anthony',2016);
+insert into movies_schema.movies values (4,'Avengers: The end game','Ruso brothers',2019);
+
+insert into movies_schema.boxoffice values (1,11231231,4132131);
+insert into movies_schema.boxoffice values (2,24231231,12132131);
+insert into movies_schema.boxoffice values (3,121231231,412132131);
+insert into movies_schema.boxoffice values (4,99991231,942132131);
+
+-- finding total sales w.r.t each movie id;
+select name, sum(internation_sales + domestic_sales) as total_Sales from movies_schema.movies as movies
+join movies_schema.boxoffice as boxoffice on movies.id = boxoffice.movie_id
+group by name
+order by total_Sales desc;
+
+
+
