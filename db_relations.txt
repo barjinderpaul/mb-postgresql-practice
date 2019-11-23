@@ -1,0 +1,117 @@
+
+-- Why relations;
+create table customer (
+    cust_id int not null primary key ,
+    first_name varchar(30) not null,
+    last_name varchar(30) not null,
+    email varchar(40) not null,
+    address varchar(40) not null
+);
+
+create table order_details (
+    order_id int not null primary key ,
+    date date not null,
+    quantity int not null,
+    total_due int not null
+);
+
+insert into customer values (1,'John','Wick','abc@gmail.com','11B, any address');
+insert into customer values (2,'Joe','Willy','cba@gmail.com','91A, any address');
+insert into customer values (3,'Jim','Garner','dba@gmail.com','123D, any address');
+
+select *from customer;
+
+insert into order_details  values (110,'3/1/2019',4,1230);
+insert into order_details  values (111,'4/13/2019',14,4230);
+insert into order_details  values (112,'5/26/2019',2,530);
+
+select *from order_details;
+
+
+-- For every order, we must need the details for who this order supplies to !
+
+-- Sol 1 - We can copy data from our customer table and add same columns to order_details, but that is not good!
+
+-- Sol 2 - Instead of copying all the data, we can define a relation with these two tables based on cust_id as
+--          a foreign key;
+
+alter table order_details add column customerID int references customer(cust_id);
+
+UPDATE order_details SET customerID = 1 WHERE order_id = 110;
+UPDATE order_details SET customerID = 2 WHERE order_id = 111;
+UPDATE order_details SET customerID = 3 WHERE order_id = 112;
+
+
+select *from order_details;
+select *from customer;
+
+select cust_id,order_id,first_name, last_name, quantity, address from customer join order_details
+    on customer.cust_id = order_details.customerID;
+
+-- 1 -> Many relationship;
+-- 1 customer can place many orders;
+insert into order_details  values (114,'5/26/2019',4,430,2);
+insert into order_details  values (115,'5/26/2019',5,930,2);
+select cust_id,order_id,first_name, last_name, quantity, address from customer join order_details
+on customer.cust_id = order_details.customerID;
+
+
+-- 1-1 relationship;
+-- Example of 1 person having one adhaar number;
+-- Many persons cannot have the same adhaar number;
+
+
+-- Many <-> Many relationship ;
+create table author (
+    id int not null primary key ,
+    name varchar(30) not null
+);
+
+insert into author values (1,'Jordan Rellick');
+insert into author values (2,'Fred Summers');
+
+create table books (
+    book_id int not null primary key ,
+    title varchar(50) not null ,
+    ISBN varchar(30) not null
+);
+
+insert into books values (1,'DB Design','ABC123');
+insert into books values (2,'Share Point', 'ZNA312');
+insert into books values (3,'Posgres', 'FSA132');
+
+select * from author;
+select *from books;
+
+-- 1 author can have many books
+-- but also 1 book can be written by many authors in collaboration;
+-- What we can do?
+-- Similar to 1->Many relationship, we can add author.id column to books table,
+-- But what if we have a title written by two or authors, we will have to add more and more columns for author
+
+-- What we actually do is design another intermediary table to solve this issue -
+-- this table is junciton to two both author and books table;
+
+create table authorbook (
+    id int not null primary key ,
+    authorId int references author(id),
+    bookId int references books(book_id)
+);
+
+-- What it does is that it defines a
+-- 1 -> Many between author and authorbook and take bookId from books table
+-- 1 -> Many between books and authorbook and take author.id from author table
+select *from author;
+select *from books;
+
+insert into authorbook values (110,1,1);
+insert into authorbook values (111,2,2);
+insert into authorbook values (112,1,3);
+insert into authorbook values (113,2,3);
+
+
+-- Many-Many mapping query
+-- 1 ->
+select author.id, author.name, authorbook.bookId
+from author join authorbook on authorbook.authorId=author.id
+where authorbook.bookId=bookId;
